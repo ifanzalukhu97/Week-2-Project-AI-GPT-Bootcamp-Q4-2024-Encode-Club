@@ -6,7 +6,7 @@ const openai = new OpenAI();
 export const runtime = "edge";
 
 export async function POST(req: Request) {
-    const {messages, temperature = 0.7} = await req.json();
+    const {messages, temperature} = await req.json();
 
     const systemMessage = messages[0]?.content?.startsWith("Please evaluate")
         ? {
@@ -28,7 +28,7 @@ export async function POST(req: Request) {
     const response = await openai.chat.completions.create({
         model: 'gpt-3.5-turbo',
         messages: [systemMessage, ...messages],
-        temperature,
+        temperature : parseFloat(temperature),
         stream: true,
     });
 
