@@ -1,36 +1,83 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## Week 2 Project - AI GPT Bootcamp Q4 2024 - Encode Club
 
-## Getting Started
+### Project Description
 
-First, run the development server:
+This is a web application built using Next.js to generate jokes using AI (OpenAI ). The application allows users to
+customize jokes by selecting topics (such as work, people, animals, food, television), tones (such as witty, sarcastic,
+silly), joke types (such as pun, knock-knock, story), and adjust AI creativity through temperature parameter. After a
+joke is generated, users can request AI to evaluate the joke based on several criteria including humor level,
+appropriateness, originality, potential offensiveness, and target audience suitability. The application features a clean
+and responsive interface with a dark theme, and utilizes streaming for smooth AI responses.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+### Prerequisites
+1. **Node.js Installation**
+   - Node.js version 18 or later (This project uses Node.js 20)
+   - You can download it from [nodejs.org](https://nodejs.org)
+   - If you use `nvm` and need to make sure you are using Node.js 20, you can run:
+     ```bash
+     nvm use 20
+     ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. **OpenAI API Key**
+   - Create an account at [OpenAI Platform](https://platform.openai.com)
+   - Generate an API key from your OpenAI dashboard
+   - Create a `.env` file in the root directory
+   - Add your API key to the `.env` file:
+     ```
+     OPENAI_API_KEY=your_api_key_here
+     ```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### How to Run the Project
+Follow these steps to run the project locally:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. **Clone the Repository**
+   ```bash
+   git clone https://github.com/ifanzalukhu97/Week-2-Project-AI-GPT-Bootcamp-Q4-2024-Encode-Club.git
+   cd Week-2-Project-AI-GPT-Bootcamp-Q4-2024-Encode-Club
+   ```
 
-## Learn More
+2. **Install Dependencies**
+   ```bash
+   npm install
+   ```
 
-To learn more about Next.js, take a look at the following resources:
+3. **Set Up Environment Variables**
+   - Create a new file named `.env` in the root folder.
+   - Add your OpenAI API key to the `.env` file:
+     ```
+     OPENAI_API_KEY=your_api_key_here
+     ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+4. **Start Development Server**
+   ```bash
+   npm run dev
+   ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+5. **Access the Application**
+   - Open your browser and navigate to [http://localhost:3000](http://localhost:3000)
+   - The application should now be running and ready to use
 
-## Deploy on Vercel
+### Development Notes
+- The application will auto-update as you edit the files
+- You can modify the jokes parameters in `app/page.tsx`
+- API routes are located in `app/api/chat/route.ts`
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Overview / Report
+
+#### The experiment process 1
+![The experiment process 1](screenshots/image1.jpg)
+![The experiment process 1](screenshots/image2.jpg)
+![The experiment process 1](screenshots/image3.jpg)
+
+#### The experiment process 2
+![The experiment process 2](screenshots/image4.jpg)
+![The experiment process 2](screenshots/image5.jpg)
+
+#### The experiment process 3 - Using Different Temperatures
+![The experiment process 3](screenshots/image6.jpg)
+![The experiment process 3](screenshots/image7.jpg)
+
+#### The experiment process 4 - Using Temperatures 2
+The result is hallucination, the AI is not able to generate a joke with the temperature 2.0
+![The experiment process 4](screenshots/image8.jpg)
