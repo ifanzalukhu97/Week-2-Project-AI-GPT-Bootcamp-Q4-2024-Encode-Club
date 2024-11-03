@@ -4,19 +4,25 @@ import {useState} from "react";
 import {useChat} from "ai/react";
 
 export default function Chat() {
-
     const [state, setState] = useState({
         topic: "",
         tone: "",
         type: "",
-        temperature: 0.7, // default value
+        temperature: 0.7,
     });
+
+    const [showEvaluation, setShowEvaluation] = useState(false);
 
     const {messages, append, isLoading} = useChat({
         api: '/api/chat',
         body: {
             temperature: state.temperature,
         },
+    });
+
+    const {messages: evaluationMessages, append: appendEvaluation} = useChat({
+        api: '/api/chat',
+        id: 'evaluation'
     });
 
     const topics = [
@@ -26,6 +32,7 @@ export default function Chat() {
         {emoji: "🍔", value: "Food"},
         {emoji: "📺", value: "Television"},
     ];
+
     const tones = [
         {emoji: "😜", value: "Witty"},
         {emoji: "😏", value: "Sarcastic"},
@@ -33,6 +40,7 @@ export default function Chat() {
         {emoji: "🌑", value: "Dark"},
         {emoji: "🤡", value: "Goofy"},
     ];
+
     const types = [
         {emoji: "😂", value: "Pun"},
         {emoji: "🔔", value: "Knock-knock"},
@@ -42,11 +50,29 @@ export default function Chat() {
     const handleChange = ({
                               target: {name, value},
                           }: React.ChangeEvent<HTMLInputElement>) => {
-
         setState({
             ...state,
             [name]: value,
         });
+    };
+
+    const handleGenerateJoke = () => {
+        setShowEvaluation(false);
+        append({
+            role: "user",
+            content: `Generate a ${state.topic} joke in a ${state.tone} tone and ${state.type} type.`,
+        });
+    };
+
+    const handleEvaluate = () => {
+        const lastJoke = messages[messages.length - 1]?.content;
+        if (lastJoke && !lastJoke.startsWith("Generate")) {
+            appendEvaluation({
+                role: "user",
+                content: `Please evaluate this joke: "${lastJoke}". Provide a detailed analysis of its humor level, appropriateness, originality, potential offensiveness, and target audience suitability.`
+            });
+            setShowEvaluation(true);
+        }
     };
 
     return (
@@ -151,12 +177,7 @@ export default function Chat() {
                 <button
                     className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg disabled:opacity-50 transition-colors"
                     disabled={isLoading || !state.topic || !state.tone || !state.type}
-                    onClick={() =>
-                        append({
-                            role: "user",
-                            content: `Generate a ${state.topic} joke in a ${state.tone} tone and ${state.type} type.`,
-                        })
-                    }
+                    onClick={handleGenerateJoke}
                 >
                     {isLoading ? 'Generating...' : 'Generate Joke'}
                 </button>
@@ -164,9 +185,33 @@ export default function Chat() {
 
             {/* Result Display */}
             {messages.length > 0 && !messages[messages.length - 1]?.content.startsWith("Generate") && (
-                <div className="bg-gray-800 rounded-xl p-6 text-white">
-                    <p className="text-lg">{messages[messages.length - 1]?.content}</p>
-                </div>
+                <>
+                    <div className="bg-gray-800 rounded-xl p-6 text-white mb-4">
+                        <p className="text-lg">{messages[messages.length - 1]?.content}</p>
+                    </div>
+
+                    {/* Evaluate Button - only show if not already evaluated */}
+                    {!showEvaluation && (
+                        <div className="text-center mb-8">
+                            <button
+                                className="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-lg transition-colors"
+                                onClick={handleEvaluate}
+                            >
+                                Evaluate Joke
+                            </button>
+                        </div>
+                    )}
+
+                    {/* Evaluation Result */}
+                    {showEvaluation && evaluationMessages.length > 0 && (
+                        <div className="bg-gray-800 rounded-xl p-6 text-white">
+                            <h3 className="text-xl font-semibold mb-4">Joke Evaluation</h3>
+                            <p className="text-lg whitespace-pre-line">
+                                {evaluationMessages[evaluationMessages.length - 1]?.content}
+                            </p>
+                        </div>
+                    )}
+                </>
             )}
         </main>
     );
