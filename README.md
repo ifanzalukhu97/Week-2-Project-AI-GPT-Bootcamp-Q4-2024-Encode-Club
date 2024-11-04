@@ -68,7 +68,9 @@ Follow these steps to run the project locally:
 #### The experiment process 1
 ![The experiment process 1](screenshots/image1.jpg)
 ![The experiment process 1](screenshots/image2.jpg)
+![The experiment process 1](screenshots/image2a.jpg)
 ![The experiment process 1](screenshots/image3.jpg)
+![The experiment process 1](screenshots/image3a.jpg)
 
 #### The experiment process 2
 ![The experiment process 2](screenshots/image4.jpg)
