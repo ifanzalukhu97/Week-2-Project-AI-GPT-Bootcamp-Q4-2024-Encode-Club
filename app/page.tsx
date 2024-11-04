@@ -15,6 +15,7 @@ export default function Chat() {
     const [audioIsLoading, setAudioIsLoading] = useState(false);
     const [evaluationAudioIsLoading, setEvaluationAudioIsLoading] = useState(false);
     const [audio, setAudio] = useState<string | null>(null);
+    const [evaluationAudio, setEvaluationAudio] = useState<string | null>(null);
 
     const { messages, append, isLoading } = useChat({
         api: "/api/chat",
@@ -76,31 +77,45 @@ export default function Chat() {
         }
     };
 
-    // Fungsi untuk menghasilkan audio dari joke
-    const handleGenerateAudio = (text: string) => {
+    const handleGenerateAudio = async (text: string) => {
         setAudioIsLoading(true);
-        const synth = window.speechSynthesis;
-        const utterance = new SpeechSynthesisUtterance(text);
-
-        utterance.onend = () => {
-            setAudioIsLoading(false);
-            setAudio(text);
-        };
-
-        synth.speak(utterance);
+        try {
+            const response = await fetch("/api/audio", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ message: text }),
+            });
+    
+            const audioBlob = await response.blob();
+            const audioUrl = URL.createObjectURL(audioBlob);
+            setAudio(audioUrl);
+        } catch (error) {
+            console.error("Error generating audio:", error);
+        }
+        setAudioIsLoading(false);
     };
+    
 
-    // Fungsi untuk audio dari evaluasi joke
-    const handleGenerateEvaluationAudio = (text: string) => {
+    // Audio Evaluation use endpoint API for TTS
+    const handleGenerateEvaluationAudio = async (text: string) => {
         setEvaluationAudioIsLoading(true);
-        const synth = window.speechSynthesis;
-        const utterance = new SpeechSynthesisUtterance(text);
-
-        utterance.onend = () => {
-            setEvaluationAudioIsLoading(false);
-        };
-
-        synth.speak(utterance);
+        try {
+            const response = await fetch("/api/audio", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ message: text }),
+            });
+            const audioBlob = await response.blob();
+            const audioUrl = URL.createObjectURL(audioBlob);
+            setEvaluationAudio(audioUrl);
+        } catch (error) {
+            console.error("Error generating evaluation audio:", error);
+        }
+        setEvaluationAudioIsLoading(false);
     };
 
     return (
@@ -211,60 +226,67 @@ export default function Chat() {
                 </button>
             </div>
 
+
            {/* Result Display */}
 {messages.length > 0 && !messages[messages.length - 1]?.content.startsWith("Generate") && (
     <div className="flex items-center bg-gray-800 rounded-xl p-6 text-white mb-4">
         <p className="text-lg flex-1">{messages[messages.length - 1]?.content}</p>
         
-        {/* Audio Button di sebelah hasil joke */}
+        {/* Audio Button or Player */}
         <div className="ml-4">
-            {audioIsLoading ? (
-                <p>Audio is being generated...</p>
+            {audio ? (
+                <audio controls src={audio} className="w-full"></audio>
             ) : (
                 <button
-                    className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg transition-colors"
+                    className="bg-blue-500 p-2 text-white rounded shadow-xl"
                     onClick={() => handleGenerateAudio(messages[messages.length - 1]?.content)}
                 >
-                    Play Audio
+                    {audioIsLoading ? "Loading Audio..." : "Generate Audio"}
                 </button>
             )}
         </div>
     </div>
 )}
 
-{/* Evaluate Button - only show if not already evaluated */}
-{messages.length > 0 && !showEvaluation && !messages[messages.length - 1]?.content.startsWith("Generate") && (
-    <div className="text-center mb-8">
-        <button
-            className="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-lg transition-colors"
-            onClick={handleEvaluate}
-        >
-            Evaluate Joke
-        </button>
-    </div>
-)}
 
+            {/* Evaluate Button - only show if not already evaluated */}
+            {messages.length > 0 && !showEvaluation && !messages[messages.length - 1]?.content.startsWith("Generate") && (
+                <div className="text-center mb-8">
+                    <button
+                        className="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-lg transition-colors"
+                        onClick={handleEvaluate}
+                    >
+                        Evaluate Joke
+                    </button>
+                </div>
+            )}
 
             {/* Evaluation Result */}
             {showEvaluation && evaluationMessages.length > 0 && (
-                <>
-                    <div className="bg-gray-800 rounded-xl p-6 text-white mb-4">
-                        <h3 className="text-xl font-semibold mb-4">Joke Evaluation</h3>
-                        <p className="text-lg whitespace-pre-line">
-                            {evaluationMessages[evaluationMessages.length - 1]?.content}
-                        </p>
+                <div className="bg-gray-800 rounded-xl p-6 text-white mb-4">
+                    <h3 className="text-xl font-semibold mb-4">Joke Evaluation</h3>
+                    <p className="text-lg whitespace-pre-line">
+                        {evaluationMessages[evaluationMessages.length - 1]?.content}
+                    </p>
+                    <div className="mt-4">
+                        {evaluationAudioIsLoading ? (
+                            <p>Evaluation audio is being generated...</p>
+                        ) : evaluationAudio ? (
+                            <audio controls src={evaluationAudio} className="w-full"></audio>
+                        ) : (
+                            <button
+                                className="bg-blue-500 p-2 text-white rounded shadow-xl"
+                                onClick={() =>
+                                    handleGenerateEvaluationAudio(
+                                        evaluationMessages[evaluationMessages.length - 1]?.content
+                                    )
+                                }
+                            >
+                                Generate Evaluation Audio
+                            </button>
+                        )}
                     </div>
-
-                    {/* Audio Button for Evaluation */}
-                    <div className="text-center mb-8">
-                        <button
-                            className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-8 rounded-lg transition-colors"
-                            onClick={() => handleGenerateEvaluationAudio(evaluationMessages[evaluationMessages.length - 1]?.content)}
-                        >
-                            {evaluationAudioIsLoading ? "Loading Audio..." : "Play Evaluation Audio"}
-                        </button>
-                    </div>
-                </>
+                </div>
             )}
         </main>
     );
